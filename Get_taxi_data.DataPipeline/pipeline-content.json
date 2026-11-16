@@ -1,0 +1,72 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "BinarySource",
+            "formatSettings": {
+              "type": "BinaryReadSettings"
+            },
+            "storeSettings": {
+              "type": "HttpReadSettings",
+              "requestMethod": "GET"
+            },
+            "datasetSettings": {
+              "type": "Binary",
+              "typeProperties": {
+                "location": {
+                  "type": "HttpServerLocation"
+                }
+              },
+              "externalReferences": {
+                "connection": "2792437f-add6-4b9a-86ef-3d937632fbff"
+              },
+              "annotations": []
+            }
+          },
+          "sink": {
+            "type": "BinarySink",
+            "storeSettings": {
+              "type": "LakehouseWriteSettings"
+            },
+            "datasetSettings": {
+              "type": "Binary",
+              "typeProperties": {
+                "location": {
+                  "type": "LakehouseLocation",
+                  "folderPath": "nyc_taxi/2026",
+                  "fileName": "test.parquet"
+                }
+              },
+              "linkedService": {
+                "name": "Lakehouse_bronze",
+                "properties": {
+                  "type": "Lakehouse",
+                  "typeProperties": {
+                    "artifactId": "3a8e010a-1858-bb59-4dd7-8b4d25f7fbc7",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "rootFolder": "Files"
+                  },
+                  "annotations": []
+                }
+              },
+              "annotations": []
+            }
+          },
+          "enableStaging": false
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Copy data1",
+        "dependsOn": []
+      }
+    ]
+  }
+}
