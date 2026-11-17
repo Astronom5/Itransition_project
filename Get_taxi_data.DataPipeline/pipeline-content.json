@@ -29,7 +29,7 @@
           "sink": {
             "type": "BinarySink",
             "storeSettings": {
-              "type": "LakehouseWriteSettings"
+              "type": "AzureBlobStorageWriteSettings"
             },
             "datasetSettings": {
               "type": "Binary",
@@ -45,8 +45,8 @@
                 "properties": {
                   "type": "Lakehouse",
                   "typeProperties": {
-                    "artifactId": "3a8e010a-1858-bb59-4dd7-8b4d25f7fbc7",
-                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "artifactId": "25f7fbc7-8b4d-4dd7-bb59-18583a8e010a",
+                    "workspaceId": "792b25aa-6d19-4d65-86f4-12782fd08a42",
                     "rootFolder": "Files"
                   },
                   "annotations": []
@@ -65,8 +65,165 @@
           "secureOutput": false
         },
         "name": "Copy data1",
+        "state": "Inactive",
+        "onInactiveMarkAs": "Succeeded",
+        "dependsOn": []
+      },
+      {
+        "type": "ForEach",
+        "typeProperties": {
+          "isSequential": false,
+          "items": {
+            "value": "@json(activity('generate_date_range').output.result.exitValue)",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "type": "SetVariable",
+              "typeProperties": {
+                "variableName": "inside",
+                "value": {
+                  "value": "@item()",
+                  "type": "Expression"
+                }
+              },
+              "policy": {
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Set variable1",
+              "dependsOn": []
+            },
+            {
+              "type": "Copy",
+              "typeProperties": {
+                "source": {
+                  "type": "BinarySource",
+                  "formatSettings": {
+                    "type": "BinaryReadSettings"
+                  },
+                  "storeSettings": {
+                    "type": "HttpReadSettings",
+                    "requestMethod": "GET"
+                  },
+                  "datasetSettings": {
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "HttpServerLocation",
+                        "relativeUrl": "@{pipeline().parameters.taxi_type}_tripdata_@{item()}.parquet"
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "3ef4d9db-bf82-4e09-a68d-8b8cb63c330b"
+                    },
+                    "annotations": []
+                  }
+                },
+                "sink": {
+                  "type": "BinarySink",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageWriteSettings"
+                  },
+                  "datasetSettings": {
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "LakehouseLocation",
+                        "folderPath": "nyc_taxi/2026",
+                        "fileName": "@{pipeline().parameters.taxi_type}_tripdata_@{item()}.parquet"
+                      }
+                    },
+                    "linkedService": {
+                      "name": "Lakehouse_bronze",
+                      "properties": {
+                        "type": "Lakehouse",
+                        "typeProperties": {
+                          "artifactId": "3a8e010a-1858-bb59-4dd7-8b4d25f7fbc7",
+                          "workspaceId": "00000000-0000-0000-0000-000000000000",
+                          "rootFolder": "Files"
+                        },
+                        "annotations": []
+                      }
+                    },
+                    "annotations": []
+                  }
+                },
+                "enableStaging": false
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Get_file_data",
+              "dependsOn": []
+            }
+          ]
+        },
+        "name": "file_looping",
+        "dependsOn": [
+          {
+            "activity": "generate_date_range",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "d48b8615-b400-aadb-4ae3-ef37e4bd14f8",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "start_date ": {
+              "value": {
+                "value": "@pipeline().parameters.start_date",
+                "type": "Expression"
+              },
+              "type": "string"
+            },
+            "end_date": {
+              "value": {
+                "value": "@pipeline().parameters.end_date",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.00:10:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "generate_date_range",
         "dependsOn": []
       }
-    ]
+    ],
+    "parameters": {
+      "start_date": {
+        "type": "String",
+        "defaultValue": "2026-01-01"
+      },
+      "end_date": {
+        "type": "String",
+        "defaultValue": "2026-09-01"
+      },
+      "taxi_type": {
+        "type": "string",
+        "defaultValue": "yellow"
+      }
+    },
+    "variables": {
+      "inside": {
+        "type": "String"
+      }
+    }
   }
 }
