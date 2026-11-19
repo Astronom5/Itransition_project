@@ -2,74 +2,6 @@
   "properties": {
     "activities": [
       {
-        "type": "Copy",
-        "typeProperties": {
-          "source": {
-            "type": "BinarySource",
-            "formatSettings": {
-              "type": "BinaryReadSettings"
-            },
-            "storeSettings": {
-              "type": "HttpReadSettings",
-              "requestMethod": "GET"
-            },
-            "datasetSettings": {
-              "type": "Binary",
-              "typeProperties": {
-                "location": {
-                  "type": "HttpServerLocation"
-                }
-              },
-              "externalReferences": {
-                "connection": "2792437f-add6-4b9a-86ef-3d937632fbff"
-              },
-              "annotations": []
-            }
-          },
-          "sink": {
-            "type": "BinarySink",
-            "storeSettings": {
-              "type": "AzureBlobStorageWriteSettings"
-            },
-            "datasetSettings": {
-              "type": "Binary",
-              "typeProperties": {
-                "location": {
-                  "type": "LakehouseLocation",
-                  "folderPath": "nyc_taxi/2026",
-                  "fileName": "test.parquet"
-                }
-              },
-              "linkedService": {
-                "name": "Lakehouse_bronze",
-                "properties": {
-                  "type": "Lakehouse",
-                  "typeProperties": {
-                    "artifactId": "25f7fbc7-8b4d-4dd7-bb59-18583a8e010a",
-                    "workspaceId": "792b25aa-6d19-4d65-86f4-12782fd08a42",
-                    "rootFolder": "Files"
-                  },
-                  "annotations": []
-                }
-              },
-              "annotations": []
-            }
-          },
-          "enableStaging": false
-        },
-        "policy": {
-          "timeout": "0.12:00:00",
-          "retry": 0,
-          "retryIntervalInSeconds": 30,
-          "secureInput": false,
-          "secureOutput": false
-        },
-        "name": "Copy data1",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
-        "dependsOn": []
-      },
-      {
         "type": "ForEach",
         "typeProperties": {
           "isSequential": false,
@@ -78,22 +10,6 @@
             "type": "Expression"
           },
           "activities": [
-            {
-              "type": "SetVariable",
-              "typeProperties": {
-                "variableName": "inside",
-                "value": {
-                  "value": "@item()",
-                  "type": "Expression"
-                }
-              },
-              "policy": {
-                "secureInput": false,
-                "secureOutput": false
-              },
-              "name": "Set variable1",
-              "dependsOn": []
-            },
             {
               "type": "Copy",
               "typeProperties": {
@@ -111,7 +27,10 @@
                     "typeProperties": {
                       "location": {
                         "type": "HttpServerLocation",
-                        "relativeUrl": "@{pipeline().parameters.taxi_type}_tripdata_@{item()}.parquet"
+                        "relativeUrl": {
+                          "value": "@{pipeline().parameters.taxi_type}_tripdata_@{item()}.parquet",
+                          "type": "Expression"
+                        }
                       }
                     },
                     "externalReferences": {
@@ -131,7 +50,10 @@
                       "location": {
                         "type": "LakehouseLocation",
                         "folderPath": "nyc_taxi/2026",
-                        "fileName": "@{pipeline().parameters.taxi_type}_tripdata_@{item()}.parquet"
+                        "fileName": {
+                          "value": "@{pipeline().parameters.taxi_type}_tripdata_@{item()}.parquet",
+                          "type": "Expression"
+                        }
                       }
                     },
                     "linkedService": {
